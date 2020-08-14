@@ -5,6 +5,8 @@ import { motion, useAnimation } from "framer-motion"
 
 
 export default function GroupViz() {
+
+    const [test, setTest] = useState(false)
     
 
     const anim = useAnimation()
@@ -17,15 +19,15 @@ export default function GroupViz() {
     const initialMove = {translateX: 700, translateY: 50, transition: {duration: .5,}}
 
     const dismount1 = {translateX: 900,  transition: {duration: 1,}}
-    const R0 = {rotate: 0, rotateX: 0, rotateY: 0, transition: {duration: 2}}
-    const R90 = {rotate: -90, rotateX: 0, rotateY: 0,transition: {duration: 2}}
-    const R180 = {rotate: -180, rotateX: 0, rotateY: 0,transition: {duration: 2}}
+    const R0 = {rotate: 0, rotateX: 0, rotateY: 0, transition: {duration: 1}}
+    const R90 = {rotate: -90, rotateX: 0, rotateY: 0,transition: {duration: 1}}
+    const R180 = {rotate: -180, rotateX: 0, rotateY: 0,transition: {duration: 1.5}}
     const R270 = {rotate: -270, rotateX: 0, rotateY: 0,transition: {duration: 2}}
 
-    const H = {rotate: 0, rotateY: 0, rotateX: 180, transition: {duration: 2}}
-    const V = {rotate: 0, rotateX: 0, rotateY: 180, transition: {duration: 2}}
-    const D = { rotate: 90, rotateX: 180, rotateY: 0, transition: {duration: 2} }
-    const Dprime = { rotate: 90, rotateX: 0, rotateY: 180, transition: {duration: 2}}
+    const H = {rotate: 0, rotateY: 0, rotateX: 180, transition: {duration: 1}}
+    const V = {rotate: 0, rotateX: 0, rotateY: 180, transition: {duration: 1}}
+    const D = { rotate: 90, rotateX: 180, rotateY: 0, transition: {duration: 1.5} }
+    const Dprime = { rotate: 90, rotateX: 0, rotateY: 180, transition: {duration: 1.5}}
 
 
     const cayley = [[R0, R90, R180, R270, H, V, D, Dprime],
@@ -52,7 +54,13 @@ export default function GroupViz() {
 
         const numberAnim = {rotate: -result.rotate, rotateX: -result.rotateX, rotateY: -result.rotateY, transition: {duration: .5}}
 
-        return [cayley[elem2Idx][elem1Idx], numberAnim]
+        if (result === D || result === Dprime) {
+            numberAnim.rotateX = numberAnim.rotateX + 180
+            numberAnim.rotateY = numberAnim.rotateY+ 180
+
+        }
+
+        return [result, numberAnim]
 
     }
 
@@ -62,7 +70,7 @@ export default function GroupViz() {
         const rotY = event1.rotateY
         const rotZ = event1.rotate
 
-        const corrected = {rotate:0, rotateX: 0, rotateY: 0, transition: {duration: 2}}
+        const corrected = {rotate:0, rotateX: 0, rotateY: 0, transition: {duration: event2.transition.duration}}
 
         if (event1 === R90 || event1 === R270 || event1 === D || event1 === Dprime) {
             corrected.rotate = rotZ + event2.rotate
@@ -76,26 +84,41 @@ export default function GroupViz() {
 
         const numberAnim = {rotate:-corrected.rotate, rotateX: -corrected.rotateX, rotateY: -corrected.rotateY, transition: {duration: .5,}}
 
+        const comp = cayleyLookup([event1, event2])[0]
+
+        if (comp === D || comp === Dprime) {
+            numberAnim.rotateX = numberAnim.rotateX + 180
+            numberAnim.rotateY = numberAnim.rotateY+ 180
+
+        }
+
         return [corrected, numberAnim]
 
 
     }
 
-    const events = [H, D]
+    const events = [R90, V]
 
-    async function completeSequence(events) {
-
+    async function firstMove(events) {
         await anim.start(initialMove)
         await anim.start({scale:1.5, transition: {duration: 1, type: "spring"}})
 
         const event1 = events[0]
         const event2 = events[1]
+        await anim.start(event1)
+    }
 
-        await anim.start(event1)        
+    async function secondMove(events) {
 
+        const event1 = events[0]
+        const event2 = events[1]
         await anim.start(correctRotation(event1, event2)[0])
-        await numberAnimation1.start(correctRotation(event1, event2)[1])        
+        await numberAnimation1.start(correctRotation(event1, event2)[1])      
+    }
 
+    async function thirdMove(events) {
+        const event1 = events[0]
+        const event2 = events[1]
         await anim.start(dismount1)
         await anim2.start({translateX: 400, translateY: 50, transition: {duration: .5,}})
         await anim2.start({scale:1.5, transition: {duration: 1, type: "spring"}})
@@ -106,8 +129,14 @@ export default function GroupViz() {
 
         anim2.start({translateX: 670, transition: {duration: 2}})
         await anim.start({translateX: 670, transition: {duration: 2}})
-        
 
+    }
+
+    async function completeSequence(events) {
+
+        await firstMove(events)
+        await secondMove(events)
+        await thirdMove(events)
     }
 
 
@@ -229,6 +258,26 @@ export default function GroupViz() {
                     Animate
                 </Button>
             </div>
+
+            <div style={{paddingTop: 20}}>
+                <Button onClick={() => firstMove(events)}>
+                    first
+                </Button>
+            </div>
+
+            <div style={{paddingTop: 20}}>
+                <Button onClick={() => secondMove(events)}>
+                    second
+                </Button>
+            </div>
+
+            <div style={{paddingTop: 20}}>
+                <Button onClick={() => thirdMove(events)}>
+                    third
+                </Button>
+            </div>
+
+
             
         </div>
   );
