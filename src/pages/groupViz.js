@@ -402,9 +402,9 @@ export default function GroupViz() {
 
 
     return (
-        <div className="Page" style={{ }} >
+        <div className="Page" style={{zoom: .9 }} >
             <div style={{display: "flex", paddingLeft: 30, backgroundColor: "#DCDCDC",}}>
-                <h1 style={{fontFamily: "Avenir-light",}}>Visualize Group Theory</h1>
+                <h1 style={{fontFamily: "Avenir-light",}}>Visualize Group Theory!</h1>
                 <h1 style={{fontFamily: "Avenir-light",position: "absolute", marginLeft: 1350, marginTop: 35, fontSize: 13}}>created by Alex Young</h1>
 
             </div>
