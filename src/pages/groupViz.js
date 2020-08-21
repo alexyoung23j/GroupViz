@@ -28,11 +28,13 @@ export default function GroupViz() {
     
     var playAnim = useAnimation()
     var origAnim = useAnimation()
+    var resetAnim = useAnimation()
 
     var anim = useAnimation()
     var anim2 = useAnimation()
     var numberAnimation1 = useAnimation()
     var numberAnimation2 = useAnimation()
+    var info = useAnimation()
 
     var r0Anim = useAnimation()
     var r0Anim2 = useAnimation()
@@ -152,6 +154,7 @@ export default function GroupViz() {
         anim2.set({opacity: 0})
         origAnim.set({opacity: .7, transition: {duration: 1}})
 
+        info.set({opacity: 0.5})
         r0Anim.set({opacity: 0.5})
         r90Anim.set({opacity: 0.5})
         r180Anim.set({opacity: 0.5})
@@ -214,6 +217,7 @@ export default function GroupViz() {
         await anim.start({translateX: 650, transition: {duration: 2}})
         await anim2.start({scale: 1.6, transition: {duration: 1, type: "spring"}})
 
+        resetAnim.start({scale: [1, 1.2, 1], transition: {duration:1,  loop: Infinity}})
 
 
     }
@@ -235,6 +239,10 @@ export default function GroupViz() {
         numberAnimation2.set({rotate: 0, rotateX: 0, rotateY: 0})
 
         playAnim.set({opacity: 0.5, scale:1 })
+
+        info.set({opacity: 1})
+        resetAnim.set({scale:1})
+
 
         r0Anim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
         r90Anim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
@@ -395,7 +403,7 @@ export default function GroupViz() {
 
     return (
         <div className="Page" style={{ }} >
-            <div style={{display: "flex", paddingLeft: 20, backgroundColor: "#DCDCDC",}}>
+            <div style={{display: "flex", paddingLeft: 30, backgroundColor: "#DCDCDC",}}>
                 <h1 style={{fontFamily: "Avenir-light",}}>Visualize Group Theory</h1>
                 <h1 style={{fontFamily: "Avenir-light",position: "absolute", marginLeft: 1350, marginTop: 35, fontSize: 13}}>created by Alex Young</h1>
 
@@ -405,6 +413,7 @@ export default function GroupViz() {
                 
                 <AnimatePresence>
                     {initialMessage && (
+                        
                         <motion.h1 
                         initial={{opacity:1}}
                         exit={{opacity:0, transition: {duration: 1}}}
@@ -417,8 +426,9 @@ export default function GroupViz() {
                 </AnimatePresence>
 
                 <motion.h1 
-                    whileHover={{scale:1.1}}
-                    style={{borderRadius: 10, cursor: "pointer", backgroundColor: "#DCDCDC", alignItems: "center", position: "absolute", paddingTop: 10, paddingLeft: 20, paddingRight: 20, paddingBottom: 10, fontSize: 16,fontFamily: "Avenir-light",  marginTop: 720, width: 200, marginLeft: -72, justifyContent: "center", display: "flex"}}>
+                    animate={info}
+                    whileHover={{scale:1.05}}
+                    style={{borderRadius: 10, fontStyle: "italic", cursor: "pointer", backgroundColor: "#DCDCDC", alignItems: "center", position: "absolute", paddingTop: 10, paddingLeft: 20, paddingRight: 20, paddingBottom: 10, fontSize: 16,fontFamily: "Avenir-light",  marginTop: 720, width: 200, marginLeft: -72, justifyContent: "center", display: "flex"}}>
                         The Dihedral Group of Order 4 (D4) describes the rotations and reflections that capture the symmetries of a square. Each composition of two group elements is equavalent to some other group element!
                 </motion.h1>
 
@@ -709,7 +719,8 @@ export default function GroupViz() {
                 <motion.div
                     onTap={() => resetAnimations()}
                     whileHover={{scale:1.1}}
-                    style={{position: "absolute", marginLeft: -130,  marginTop: -6, cursor: "pointer",fontSize: 30, color: "orange", display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center"}}>
+                    animate={resetAnim}
+                    style={{position: "absolute", marginLeft: -130,  marginTop: -6, cursor: "pointer",fontSize: 30, color: "#ff9000", display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center"}}>
                     
                     reset
                 </motion.div>
