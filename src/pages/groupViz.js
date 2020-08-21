@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {Button, Card, } from "react-bootstrap"
-import { motion, useAnimation } from "framer-motion"
+import { motion, useAnimation, AnimatePresence } from "framer-motion"
 
 import { GrRotateLeft } from 'react-icons/gr';
 import { CgEditFlipH } from 'react-icons/cg';
-
+import { AiFillPlayCircle} from "react-icons/ai"
+ 
 
 
 
@@ -15,16 +16,18 @@ export default function GroupViz() {
     const initialMove = {translateX: 650, translateY: 85, transition: {duration: .5,}}
 
     var dismount1 = {translateX: 900,  transition: {duration: 1,}}
-    var R0 = {rotate: 0, rotateX: 0, rotateY: 0, transition: {duration: 1}} 
-    var R90 = {rotate: -90, rotateX: 0, rotateY: 0,transition: {duration: 1}}
-    var R180 = {rotate: -180, rotateX: 0, rotateY: 0,transition: {duration: 1.5}}
-    var R270 = {rotate: -270, rotateX: 0, rotateY: 0,transition: {duration: 2}}
+    var R0 = {rotate: 0, rotateX: 0, rotateY: 0, scale: [1.5, 1.6, 1.5], transition: {duration: 1}} 
+    var R90 = {rotate: -90, rotateX: 0, rotateY: 0,transition: {duration: 1.5}}
+    var R180 = {rotate: -180, rotateX: 0, rotateY: 0,transition: {duration: 2}}
+    var R270 = {rotate: -270, rotateX: 0, rotateY: 0,transition: {duration: 2.5}}
 
-    var H = {rotate: 0, rotateY: 0, rotateX: 180, transition: {duration: 1}}
-    var V = {rotate: 0, rotateX: 0, rotateY: 180, transition: {duration: 1}}
-    var D = { rotate: 90, rotateX: 180, rotateY: 0, transition: {duration: 1.5}}
-    var Dprime = { rotate: 90, rotateX: 0, rotateY: 180, transition: {duration: 1.5}}
+    var H = {rotate: 0, rotateY: 0, rotateX: 180, transition: {duration: 1.5}}
+    var V = {rotate: 0, rotateX: 0, rotateY: 180, transition: {duration: 1.5}}
+    var D = { rotate: 90, rotateX: 180, rotateY: 0, transition: {duration: 2}}
+    var Dprime = { rotate: 90, rotateX: 0, rotateY: 180, transition: {duration: 2}}
     
+    var playAnim = useAnimation()
+    var origAnim = useAnimation()
 
     var anim = useAnimation()
     var anim2 = useAnimation()
@@ -51,12 +54,15 @@ export default function GroupViz() {
 
 
 
-    const [events, setEvents] = useState({one: D, two: R90})
+    const [events, setEvents] = useState()
     const [elem1, setElem1] = useState()
+    const [elem1Control, setElem1Control] = useState()
     const [elem2, setElem2] = useState()
+    const [elem2Control, setElem2Control] = useState()
+    const [animUnfinished, setAnimUnfinished] = useState(true)
     const [resultComp, setResultComp] = useState()
-    const [vizReady, setVizReady] = useState(false)
 
+    const [initialMessage, setInitialMessage] = useState(true)
 
  
 
@@ -142,22 +148,55 @@ export default function GroupViz() {
 
 
     async function firstMove() {
+        playAnim.start({opacity: .5, transition: {duration: 1}})
+        anim2.set({opacity: 0})
+        origAnim.set({opacity: .7, transition: {duration: 1}})
+
+        r0Anim.set({opacity: 0.5})
+        r90Anim.set({opacity: 0.5})
+        r180Anim.set({opacity: 0.5})
+        r270Anim.set({opacity: 0.5})
+        HAnim.set({opacity: 0.5})
+        VAnim.set({opacity: 0.5})
+        DAnim.set({opacity: 0.5})
+        DprimeAnim.set({opacity: 0.5})
+
+        r0Anim2.set({opacity: 0.5})
+        r90Anim2.set({opacity: 0.5})
+        r180Anim2.set({opacity: 0.5})
+        r270Anim2.set({opacity: 0.5})
+        HAnim2.set({opacity: 0.5})
+        VAnim2.set({opacity: 0.5})
+        DAnim2.set({opacity: 0.5})
+        DprimeAnim2.set({opacity: 0.5})
+
+        setAnimUnfinished(false)
+
+
         await anim.start(initialMove)
         await anim.start({scale:1.5, transition: {duration: 1, type: "spring"}})
+        await elem1Control.start({scale:1.3, opacity: 1, transition: {duration: 1.5, type: "spring", loop: "infinity"}})
 
         const event1 = events.one
         await anim.start(event1)
+        await elem1Control.start({scale:1, transition: {duration: .5, type: "spring"}})
     }
 
     async function secondMove() {
         await setResultComp(cayleyLookup()[0])
+        await elem2Control.start({scale:1.3, opacity:1, transition: {duration: 1.5, type: "spring", loop: "infinity"}})
 
         await anim.start(correctRotation()[0])
         await numberAnimation1.start(correctRotation()[1])    
+        await elem2Control.start({scale:1, transition: {duration: .5, type: "spring"}})
+        anim.start({opacity: 0.7, transition: {duration: 1}})
+
     }
 
     async function thirdMove() {
         const result = cayleyLookup()[0]
+        await anim2.start({opacity: 1, transition: {duration: .1}})
+
         
         await anim.start(dismount1)
         
@@ -170,7 +209,11 @@ export default function GroupViz() {
         await numberAnimation2.start(cayleyLookup()[1])
 
         anim2.start({translateX: 650, transition: {duration: 2}})
+        anim.start({opacity: 1, transition: {duration: 1}})
+
         await anim.start({translateX: 650, transition: {duration: 2}})
+        await anim2.start({scale: 1.6, transition: {duration: 1, type: "spring"}})
+
 
 
     }
@@ -191,32 +234,37 @@ export default function GroupViz() {
         numberAnimation1.set({rotate: 0, rotateX: 0, rotateY: 0})
         numberAnimation2.set({rotate: 0, rotateX: 0, rotateY: 0})
 
-        r0Anim.set({translateX: 0, translateY: 0, scale:1})
-        r90Anim.set({translateX: 0, translateY: 0, scale:1})
-        r180Anim.set({translateX: 0, translateY: 0, scale:1})
-        r270Anim.set({translateX: 0, translateY: 0, scale:1})
-        HAnim.set({translateX: 0, translateY: 0, scale:1})
-        VAnim.set({translateX: 0, translateY: 0, scale:1})
-        DAnim.set({translateX: 0, translateY: 0, scale:1})
-        DprimeAnim.set({translateX: 0, translateY: 0,scale:1})
+        playAnim.set({opacity: 0.5, scale:1 })
 
-        r0Anim2.set({translateX: 0, translateY: 0, scale:1})
-        r90Anim2.set({translateX: 0, translateY: 0, scale:1})
-        r180Anim2.set({translateX: 0, translateY: 0, scale:1})
-        r270Anim2.set({translateX: 0, translateY: 0, scale:1})
-        HAnim2.set({translateX: 0, translateY: 0, scale:1})
-        VAnim2.set({translateX: 0, translateY: 0, scale:1})
-        DAnim2.set({translateX: 0, translateY: 0, scale:1})
-        DprimeAnim2.set({translateX: 0, translateY: 0,scale:1})
+        r0Anim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        r90Anim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        r180Anim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        r270Anim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        HAnim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        VAnim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        DAnim.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        DprimeAnim.set({translateX: 0, translateY: 0,scale:1, opacity: 1})
+
+        r0Anim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        r90Anim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        r180Anim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        r270Anim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        HAnim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        VAnim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        DAnim2.set({translateX: 0, translateY: 0, scale:1, opacity: 1})
+        DprimeAnim2.set({translateX: 0, translateY: 0,scale:1, opacity: 1})
+
+        setElem1Control()
+        setElem2Control()
 
         setElem1()
         setElem2()
         setEvents({one: {}, two: {}})
-        setVizReady(false)
         setResultComp()
 
         anim.stop()
         anim2.stop()
+        setAnimUnfinished(true)
 
         numberAnimation1.stop()
         numberAnimation2.stop()
@@ -255,12 +303,13 @@ export default function GroupViz() {
             verticalOffset = 360
         }
 
-        console.log(resultComp,controller)
 
-        await controller.start({translateX: -341, translateY: 393- verticalOffset, scale:1.2, transition: {duration: 2}})
+        await controller.start({opacity:1, translateX: -341, translateY: 393- verticalOffset,transition: {duration: 1}})
+        await controller.start({scale:1.3, transition: {duration:1, type: "spring"}})
     }
 
-    function animateElem(verticalOffset, horizontalOffset, elem) {
+    function animateElem(verticalOffset, horizontalOffset, elem, elemNum) {
+        setInitialMessage(false)
         var controller; 
 
         if (_.isEqual(elem, R0)) {
@@ -283,6 +332,11 @@ export default function GroupViz() {
             controller = DprimeAnim
         }
 
+        if (elemNum === 1) {
+            setElem1Control(controller)
+        } else {
+            setElem2Control(controller)
+        }
         controller.start({translateX: horizontalOffset, translateY: 393-verticalOffset})
     }
     function handleAnimation(verticalOffset) {
@@ -311,16 +365,16 @@ export default function GroupViz() {
             console.log("filling first")
             setEvents({one: targetElem, two: {}})
             setElem1(targetElem)
-            animateElem(verticalOffset, -880, targetElem)
+            animateElem(verticalOffset, -880, targetElem, 1)
             // fill elem 1
         } else if (!elem2) {
             console.log("noo")
             // fill elem 2
             setEvents({one: events.one, two: targetElem})
             setElem2(targetElem)
-            animateElem(verticalOffset, -610, targetElem)
+            animateElem(verticalOffset, -610, targetElem, 2)
+            playAnim.start({opacity: 1, scale: 1.1, transition: {duration: .5}})
 
-            setVizReady(true)
 
         } else {
             console.log(elem1, elem2)
@@ -330,17 +384,46 @@ export default function GroupViz() {
         
     }
 
+    function handleStart() {
+        if (elem1 && elem2 && animUnfinished) {
+            completeSequence()
+        }
+    }
+
 
 
 
     return (
-        <div className="Page" style={{backgroundColor: "#F5F5F5", }} >
+        <div className="Page" style={{ }} >
             <div style={{display: "flex", paddingLeft: 20, backgroundColor: "#DCDCDC",}}>
                 <h1 style={{fontFamily: "Avenir-light",}}>Visualize Group Theory</h1>
+                <h1 style={{fontFamily: "Avenir-light",position: "absolute", marginLeft: 1350, marginTop: 35, fontSize: 13}}>created by Alex Young</h1>
+
             </div>
             <div style={{paddingLeft: 85, paddingRight: 0, display: "flex", justifyContent: "flex-start", alignItems: "center", flexGrow: 1}}>
                 <h1 style={{fontSize: 20,fontFamily: "Avenir-light", }}>Original</h1>
-                <h1 style={{position: "absolute", fontSize: 20, fontFamily: "Avenir-light",marginLeft: 520}}>Explore the Symmetries of a Square</h1>
+                
+                <AnimatePresence>
+                    {initialMessage && (
+                        <motion.h1 
+                        initial={{opacity:1}}
+                        exit={{opacity:0, transition: {duration: 1}}}
+                            style={{position: "absolute", marginLeft: 420, marginTop: 450, width: 600, fontSize: 20,fontFamily: "Avenir-light", display: "flex",}}>
+                            Click on the group elements to visualize a composition!
+
+                        </motion.h1>
+                    )}
+                    
+                </AnimatePresence>
+
+                <motion.h1 
+                    whileHover={{scale:1.1}}
+                    style={{borderRadius: 10, cursor: "pointer", backgroundColor: "#DCDCDC", alignItems: "center", position: "absolute", paddingTop: 10, paddingLeft: 20, paddingRight: 20, paddingBottom: 10, fontSize: 16,fontFamily: "Avenir-light",  marginTop: 720, width: 200, marginLeft: -72, justifyContent: "center", display: "flex"}}>
+                        The Dihedral Group of Order 4 (D4) describes the rotations and reflections that capture the symmetries of a square. Each composition of two group elements is equavalent to some other group element!
+                </motion.h1>
+
+                
+
                 <h1 style={{fontSize: 20, fontFamily: "Avenir-light",marginLeft: 1150}}>D4 Group Elements</h1>
             </div>
             <div style={{paddingLeft: 25, display: "flex", justifyContent: "flex-start", alignItems: "flex-start"}}>
@@ -422,7 +505,7 @@ export default function GroupViz() {
                                 onTap={() => handleAnimation(0)}
 
                                 whileHover={{scale:1.1}}
-                                style={{zIndex: 0, position: "absolute", backgroundColor: "#ffd000",display: "flex", alignItems: "center", justifyContent: "flex-start", width: 170, fontFamily: "Avenir-light", borderRadius: 5 , paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{zIndex: 0, position: "absolute", backgroundColor: "#ffd000",display: "flex", cursor: "pointer", alignItems: "center", justifyContent: "flex-start", width: 170, fontFamily: "Avenir-light", borderRadius: 5 , paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                 Rotate 0
@@ -433,7 +516,7 @@ export default function GroupViz() {
                                 //onTap={() => handleAnimation(0)}
 
                                 whileHover={{scale:1.1}}
-                                style={{zIndex: 1, backgroundColor: "#ffd000",display: "flex", alignItems: "center", justifyContent: "flex-start", width: 170, fontFamily: "Avenir-light", borderRadius: 5 , paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{zIndex: 1, backgroundColor: "#ffd000",display: "flex", alignItems: "center", cursor: "pointer",justifyContent: "flex-start", width: 170, fontFamily: "Avenir-light", borderRadius: 5 , paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                 Rotate 0
@@ -443,7 +526,7 @@ export default function GroupViz() {
                                 animate={r90Anim}
                                 onTap={() => handleAnimation(41)}                                
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ffd000",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ffd000",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -453,7 +536,7 @@ export default function GroupViz() {
                                 animate={r90Anim2}
                                 //onTap={() => handleAnimation(41)}                                
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ffd000",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ffd000",display: "flex", justifyContent: "flex-start", cursor: "pointer",alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -464,7 +547,7 @@ export default function GroupViz() {
                                 onTap={() => handleAnimation(83)}                                
 
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ffba00",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ffba00",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                    <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -475,7 +558,7 @@ export default function GroupViz() {
                                 //onTap={() => handleAnimation(83)}                                
 
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ffba00",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ffba00",display: "flex", justifyContent: "flex-start", cursor: "pointer",alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                    <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -485,7 +568,7 @@ export default function GroupViz() {
                                 animate={r270Anim}
                                 onTap={() => handleAnimation(124)}    
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ffa500",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ffa500",display: "flex",cursor: "pointer", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                      <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -495,7 +578,7 @@ export default function GroupViz() {
                                 animate={r270Anim2}
                                 //onTap={() => handleAnimation(124)}    
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ffa500",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ffa500",display: "flex", justifyContent: "flex-start",cursor: "pointer", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                      <GrRotateLeft style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -513,7 +596,7 @@ export default function GroupViz() {
                                 animate={HAnim}
                                 onTap={() => handleAnimation(235)}   
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ff8500",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 ,fontFamily: "Avenir-light", paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ff8500",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 ,fontFamily: "Avenir-light", paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                 Horizontal
@@ -522,7 +605,7 @@ export default function GroupViz() {
                                 animate={HAnim2}
                                 //onTap={() => handleAnimation(235)}   
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ff8500",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 ,fontFamily: "Avenir-light", paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ff8500",display: "flex", justifyContent: "flex-start", cursor: "pointer",alignItems: "center", width: 170, borderRadius: 5 ,fontFamily: "Avenir-light", paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                 Horizontal
@@ -531,7 +614,7 @@ export default function GroupViz() {
                                 animate={VAnim}
                                 onTap={() => handleAnimation(277)}   
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ff7000",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ff7000",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -541,7 +624,7 @@ export default function GroupViz() {
                                 animate={VAnim2}
                                 //onTap={() => handleAnimation(277)}   
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ff7000",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ff7000",display: "flex", justifyContent: "flex-start", cursor: "pointer",alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
 
@@ -551,7 +634,7 @@ export default function GroupViz() {
                                 animate={DAnim}
                                 onTap={() => handleAnimation(318)}  
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ff5a00",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ff5a00",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                 Diagonal 1
@@ -560,7 +643,7 @@ export default function GroupViz() {
                                 animate={DAnim2}
                                 //onTap={() => handleAnimation(318)}  
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ff5a00",display: "flex", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ff5a00",display: "flex", justifyContent: "flex-start", cursor: "pointer",alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                 Diagonal 1
@@ -569,7 +652,7 @@ export default function GroupViz() {
                                 animate={DprimeAnim}
                                 onTap={() => handleAnimation(360)}
                                 whileHover={{scale:1.1}}
-                                style={{position: "absolute", backgroundColor: "#ff4500",display: "flex", justifyContent: "flex-start", alignItems: "center",width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{position: "absolute", backgroundColor: "#ff4500",display: "flex",cursor: "pointer", justifyContent: "flex-start", alignItems: "center",width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                Diagonal 2
@@ -578,7 +661,7 @@ export default function GroupViz() {
                                 animate={DprimeAnim2}
                                 //onTap={() => handleAnimation(360)}
                                 whileHover={{scale:1.1}}
-                                style={{backgroundColor: "#ff4500",display: "flex", justifyContent: "flex-start", alignItems: "center",width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
+                                style={{backgroundColor: "#ff4500",display: "flex", justifyContent: "flex-start",cursor: "pointer", alignItems: "center",width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
                                 <CgEditFlipH style={{fontSize: 20, marginRight: 10, marginLeft: 20}}/>
                                Diagonal 2
@@ -593,6 +676,7 @@ export default function GroupViz() {
 
                 <motion.div  
                     whileHover={{scale:1.1}}
+                    animate={origAnim}
                     style={{position: "absolute", width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}>
                     <div 
                         style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
@@ -622,6 +706,13 @@ export default function GroupViz() {
               
             </div>
             <div style= {{justifyContent: "flex-start", alignItems: "center", alignContent: "center", display: "flex", marginLeft: 220, marginTop: 248}}>
+                <motion.div
+                    onTap={() => resetAnimations()}
+                    whileHover={{scale:1.1}}
+                    style={{position: "absolute", marginLeft: -130,  marginTop: -6, cursor: "pointer",fontSize: 30, color: "orange", display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center"}}>
+                    
+                    reset
+                </motion.div>
                 <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
                     Composition: 
                 </div>
@@ -645,28 +736,23 @@ export default function GroupViz() {
 
 
 
-            <div style={{paddingTop: 20}}>
-                <Button onClick={() => completeSequence()}>
-                    Animate
-                </Button>
+            <div style={{display:"flex", alignItems: "center",}}>
+                
+                <motion.div 
+                    onTap={() => handleStart()}
+                    initial={{opacity: .5}}
+                    whileHover={{scale:1.2}}
+                    animate={playAnim}
+                    style={{marginLeft: 750, paddingTop: 40, fontSize: 60, color: "orange", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
+                    
+                    <AiFillPlayCircle />
+                </motion.div>
+                
+
+          
             </div>
 
-            <div style={{paddingTop: 20}}>
-                <Button onClick={() => resetAnimations()}>
-                    reset
-                </Button>
-            </div>
-
-            <div style={{paddingTop: 20}}>
-                <Button onClick={() => {setEvents({one: D,two:V})}}>
-                    change
-                </Button>
-            </div>
-
-            
-
-
-
+           
 
 
             
