@@ -743,7 +743,7 @@ export default function GroupViz() {
     return (
         <div className="Page" style={{display: "flex", flexDirection: "column"}} >
             <div style={{display: "flex", paddingLeft: 30, backgroundColor: "#DCDCDC",}}>
-                <h1 style={{fontFamily: "Avenir-light", flex: 1}}>Visualize Group Theory!!</h1>
+                <h1 style={{fontFamily: "Avenir-light", flex: 1}}>Visualize Group Theory</h1>
                 <h1 style={{fontFamily: "Avenir-light",  marginTop: 35, marginRight: 90, fontSize: 13}}>created by Alex Young</h1>
 
             </div>
