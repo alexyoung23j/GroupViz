@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Button, Card, } from "react-bootstrap"
 import { motion, useAnimation, AnimatePresence } from "framer-motion"
 
@@ -13,9 +13,14 @@ import { AiFillPlayCircle} from "react-icons/ai"
 
 export default function GroupViz() {
     var _ = require('lodash');
-    const initialMove = {translateX: 650, translateY: 85, transition: {duration: .5,}}
 
-    var dismount1 = {translateX: 900,  transition: {duration: 1,}}
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+    const [windowHeight, setWindowHeight] = useState(window.innerHeight)
+
+
+    const initialMove = {translateX: windowWidth*.38, translateY: 85, transition: {duration: .5,}}
+
+    var dismount1 = {translateX: windowWidth*.55,  transition: {duration: 1,}}
     var R0 = {rotate: 0, rotateX: 0, rotateY: 0, scale: [1.5, 1.6, 1.5], transition: {duration: 1}} 
     var R90 = {rotate: -90, rotateX: 0, rotateY: 0,transition: {duration: 1.5}}
     var R180 = {rotate: -180, rotateX: 0, rotateY: 0,transition: {duration: 2}}
@@ -55,6 +60,19 @@ export default function GroupViz() {
     var DprimeAnim2 = useAnimation()
 
 
+    const comp1Ref = useRef()
+    const comp2Ref = useRef()
+    const compResultRef = useRef()
+
+    const r0Ref = useRef()
+    const r90Ref = useRef()
+    const r180Ref = useRef()
+    const r270Ref = useRef()
+
+    const HRef = useRef()
+    const VRef = useRef()
+    const DRef = useRef()
+    const DprimeRef = useRef()
 
     const [events, setEvents] = useState()
     const [elem1, setElem1] = useState()
@@ -64,6 +82,7 @@ export default function GroupViz() {
     const [animUnfinished, setAnimUnfinished] = useState(true)
     const [resultComp, setResultComp] = useState()
 
+    
     const [initialMessage, setInitialMessage] = useState(true)
 
  
@@ -78,6 +97,14 @@ export default function GroupViz() {
                     [Dprime, H, D, V, R90, R270, R180, R0]]
 
     const cayleyOrder = [R0, R90, R180, R270, H, V, D, Dprime]
+
+    useEffect(() => {
+        window.addEventListener("resize", () => {
+            setWindowWidth(window.innerWidth)
+            setWindowHeight(window.innerHeight)
+        })
+     
+    }, [])
 
     function indexOfElem(elem) {
         var i;
@@ -203,7 +230,7 @@ export default function GroupViz() {
         
         await anim.start(dismount1)
         
-        await anim2.start({translateX: 400, translateY: 85, transition: {duration: .5,}})
+        await anim2.start({translateX: windowWidth*.25, translateY: 85, transition: {duration: .5,}})
         await anim2.start({scale:1.5, transition: {duration: 1, type: "spring"}})
 
         await animateComposition(result)
@@ -211,10 +238,10 @@ export default function GroupViz() {
         await anim2.start(result)
         await numberAnimation2.start(cayleyLookup()[1])
 
-        anim2.start({translateX: 650, transition: {duration: 2}})
+        anim2.start({translateX: windowWidth*.38, transition: {duration: 2}})
         anim.start({opacity: 1, transition: {duration: 1}})
 
-        await anim.start({translateX: 650, transition: {duration: 2}})
+        await anim.start({translateX: windowWidth*.38, transition: {duration: 2}})
         await anim2.start({scale: 1.6, transition: {duration: 1, type: "spring"}})
 
         resetAnim.start({scale: [1, 1.2, 1], transition: {duration:1,  loop: Infinity}})
@@ -283,61 +310,75 @@ export default function GroupViz() {
 
     async function animateComposition(elem) {
         var controller; 
-        var verticalOffset = 0
+        var elemRef;
 
         if (_.isEqual(elem, R0)) {
             controller = r0Anim2
-            verticalOffset = 0
+            elemRef = r0Ref
         } else if (_.isEqual(elem, R90)) {
             controller = r90Anim2
-            verticalOffset = 41
+            elemRef = r90Ref
         } else if (_.isEqual(elem, R180)) {
             controller = r180Anim2
-            verticalOffset = 83
+            elemRef = r180Ref
         } else if (_.isEqual(elem, R270)) {
             controller = r270Anim2
-            verticalOffset = 124
+            elemRef = r270Ref
         } else if (_.isEqual(elem, H)) {
             controller = HAnim2
-            verticalOffset = 235
+            elemRef = HRef
         } else if (_.isEqual(elem, V)) {
             controller = VAnim2
-            verticalOffset = 277
+            elemRef = VRef
         } else if (_.isEqual(elem, D)) {
             controller = DAnim2
-            verticalOffset = 318
+            elemRef = DRef
         } else if (_.isEqual(elem, Dprime)) {
             controller = DprimeAnim2
-            verticalOffset = 360
+            elemRef = DprimeRef
         }
 
 
-        await controller.start({opacity:1, translateX: -341, translateY: 393- verticalOffset,transition: {duration: 1}})
+        await controller.start({opacity:1, translateX: (compResultRef.current.offsetLeft- elemRef.current.offsetLeft) +15, translateY: (compResultRef.current.offsetTop - elemRef.current.offsetTop) + 4,transition: {duration: 1}})
         await controller.start({scale:1.3, transition: {duration:1, type: "spring"}})
     }
 
-    function animateElem(verticalOffset, horizontalOffset, elem, elemNum) {
+    function animateElem(compRef, elem, elemNum) {
         setInitialMessage(false)
         var controller; 
+        var elemRef;
 
         if (_.isEqual(elem, R0)) {
             controller = r0Anim
+            elemRef = r0Ref
         } else if (_.isEqual(elem, R90)) {
             controller = r90Anim
+            elemRef = r90Ref
+
         } else if (_.isEqual(elem, R180)) {
             controller = r180Anim
-        } else if (_.isEqual(elem, R90)) {
-            controller = r90Anim
+            elemRef = r180Ref
+
         } else if (_.isEqual(elem, R270)) {
             controller = r270Anim
+            elemRef = r270Ref
+
         } else if (_.isEqual(elem, H)) {
             controller = HAnim
+            elemRef =  HRef
+
         } else if (_.isEqual(elem, V)) {
             controller = VAnim
+            elemRef = VRef
+
         } else if (_.isEqual(elem, D)) {
             controller = DAnim
+            elemRef = DRef
+
         } else if (_.isEqual(elem, Dprime)) {
             controller = DprimeAnim
+            elemRef = DprimeRef
+
         }
 
         if (elemNum === 1) {
@@ -345,8 +386,11 @@ export default function GroupViz() {
         } else {
             setElem2Control(controller)
         }
-        controller.start({translateX: horizontalOffset, translateY: 393-verticalOffset})
+
+        controller.start({translateX: (compRef.current.offsetLeft- elemRef.current.offsetLeft) +15 , translateY: (compRef.current.offsetTop - elemRef.current.offsetTop) + 4})
     }
+
+
     function handleAnimation(verticalOffset) {
 
         var targetElem = {}
@@ -370,23 +414,17 @@ export default function GroupViz() {
 
 
         if (!elem1 && !elem2) {
-            console.log("filling first")
             setEvents({one: targetElem, two: {}})
             setElem1(targetElem)
-            animateElem(verticalOffset, -880, targetElem, 1)
+            animateElem(comp1Ref, targetElem, 1)
             // fill elem 1
         } else if (!elem2) {
-            console.log("noo")
             // fill elem 2
             setEvents({one: events.one, two: targetElem})
             setElem2(targetElem)
-            animateElem(verticalOffset, -610, targetElem, 2)
+            animateElem(comp2Ref, targetElem, 2)
             playAnim.start({opacity: 1, scale: 1.1, transition: {duration: .5}})
-
-
-        } else {
-            console.log(elem1, elem2)
-        }
+        } 
 
         
         
@@ -398,113 +436,116 @@ export default function GroupViz() {
         }
     }
 
-
-
-
-    return (
-        <div className="Page" style={{zoom: .9 }} >
-            <div style={{display: "flex", paddingLeft: 30, backgroundColor: "#DCDCDC",}}>
-                <h1 style={{fontFamily: "Avenir-light",}}>Visualize Group Theory!</h1>
-                <h1 style={{fontFamily: "Avenir-light",position: "absolute", marginLeft: 1350, marginTop: 35, fontSize: 13}}>created by Alex Young</h1>
-
-            </div>
-            <div style={{paddingLeft: 85, paddingRight: 0, display: "flex", justifyContent: "flex-start", alignItems: "center", flexGrow: 1}}>
-                <h1 style={{fontSize: 20,fontFamily: "Avenir-light", }}>Original</h1>
-                
-                <AnimatePresence>
-                    {initialMessage && (
-                        
-                        <motion.h1 
-                        initial={{opacity:1}}
-                        exit={{opacity:0, transition: {duration: 1}}}
-                            style={{position: "absolute", marginLeft: 420, marginTop: 450, width: 600, fontSize: 20,fontFamily: "Avenir-light", display: "flex",}}>
-                            Click on the group elements to visualize a composition!
-
-                        </motion.h1>
-                    )}
-                    
-                </AnimatePresence>
-
-                <motion.h1 
-                    animate={info}
-                    whileHover={{scale:1.05}}
-                    style={{borderRadius: 10, fontStyle: "italic", cursor: "pointer", backgroundColor: "#DCDCDC", alignItems: "center", position: "absolute", paddingTop: 10, paddingLeft: 20, paddingRight: 20, paddingBottom: 10, fontSize: 16,fontFamily: "Avenir-light",  marginTop: 720, width: 200, marginLeft: -72, justifyContent: "center", display: "flex"}}>
-                        The Dihedral Group of Order 4 (D4) describes the rotations and reflections that capture the symmetries of a square. Each composition of two group elements is equavalent to some other group element!
-                </motion.h1>
-
-                
-
-                <h1 style={{fontSize: 20, fontFamily: "Avenir-light",marginLeft: 1150}}>D4 Group Elements</h1>
-            </div>
-            <div style={{paddingLeft: 25, display: "flex", justifyContent: "flex-start", alignItems: "flex-start"}}>
-                <motion.div
-                    animate={anim}
-                    style={{width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}
+    function squares() {
+        return (        
+            <div >
+            
+             {/* First Animated Square */}
+             <motion.div
+                animate={anim}
+                style={{position: "absolute", width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}
+            >
+                <motion.div 
+                    animate={numberAnimation1}
+                    style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
                 >
-                    <motion.div 
-                        animate={numberAnimation1}
-                        style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
-                    >
-                        A
-                    </motion.div>
-             
-                    <motion.div 
-                        animate={numberAnimation1}
-                        style={{position: "absolute",marginLeft: 180, marginTop: 5, color: "#1E90FF", fontFamily: "Avenir-light"}}
-                    >
-                        B
-                    </motion.div>
-
-                    <motion.div 
-                        animate={numberAnimation1}
-                        style={{position: "absolute", marginLeft: 10, marginTop: 177, color: "#006400", fontFamily: "Avenir-light"}}
-                    >
-                        C
-                    </motion.div>
-
-                    <motion.div 
-                        animate={numberAnimation1}
-                        style={{position: "absolute", marginLeft: 180, marginTop: 177, color: "#8B0000", fontFamily: "Avenir-light"}}
-                    >
-                        D
-                    </motion.div>
+                    A
+                </motion.div>
+            
+                <motion.div 
+                    animate={numberAnimation1}
+                    style={{position: "absolute",marginLeft: 180, marginTop: 5, color: "#1E90FF", fontFamily: "Avenir-light"}}
+                >
+                    B
                 </motion.div>
 
-                <motion.div
-                    whileHover={{scale: 1.5}}
-                    animate={anim2}
-                    style={{position: "absolute",width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}
+                <motion.div 
+                    animate={numberAnimation1}
+                    style={{position: "absolute", marginLeft: 10, marginTop: 177, color: "#006400", fontFamily: "Avenir-light"}}
                 >
-                    <motion.div 
-                        animate={numberAnimation2}
-                        style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
-                    >
-                        A
-                    </motion.div>
-             
-                    <motion.div 
-                        animate={numberAnimation2}
-                        style={{position: "absolute",marginLeft: 180, marginTop: 5, color: "#1E90FF", fontFamily: "Avenir-light"}}
-                    >
-                        B
-                    </motion.div>
-
-                    <motion.div 
-                        animate={numberAnimation2}
-                        style={{position: "absolute", marginLeft: 10, marginTop: 177, color: "#006400", fontFamily: "Avenir-light"}}
-                    >
-                        C
-                    </motion.div>
-
-                    <motion.div 
-                        animate={numberAnimation2}
-                        style={{position: "absolute", marginLeft: 180, marginTop: 177, color: "#8B0000", fontFamily: "Avenir-light"}}
-                    >
-                        D
-                    </motion.div>
+                    C
                 </motion.div>
 
-                <Card style={{position: "absolute", marginLeft: 1220,  borderRadius: 10, backgroundColor: "#DCDCDC", paddingLeft:20, paddingRight: 20, paddingBottom: 30, justifyContent: "center"}}>
+                <motion.div 
+                    animate={numberAnimation1}
+                    style={{position: "absolute", marginLeft: 180, marginTop: 177, color: "#8B0000", fontFamily: "Avenir-light"}}
+                >
+                    D
+                </motion.div>
+            </motion.div>
+
+            {/* Second Animated Square */}
+            <motion.div
+                
+                animate={anim2}
+                style={{position: "absolute", width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}
+            >
+                <motion.div 
+                    animate={numberAnimation2}
+                    style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
+                >
+                    A
+                </motion.div>
+            
+                <motion.div 
+                    animate={numberAnimation2}
+                    style={{position: "absolute",marginLeft: 180, marginTop: 5, color: "#1E90FF", fontFamily: "Avenir-light"}}
+                >
+                    B
+                </motion.div>
+
+                <motion.div 
+                    animate={numberAnimation2}
+                    style={{position: "absolute", marginLeft: 10, marginTop: 177, color: "#006400", fontFamily: "Avenir-light"}}
+                >
+                    C
+                </motion.div>
+
+                <motion.div 
+                    animate={numberAnimation2}
+                    style={{position: "absolute", marginLeft: 180, marginTop: 177, color: "#8B0000", fontFamily: "Avenir-light"}}
+                >
+                    D
+                </motion.div>
+            </motion.div>
+            <motion.div  
+                whileHover={{scale:1.1}}
+                animate={origAnim}
+                style={{width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}>
+                <div 
+                    style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
+                >
+                    A
+                </div>
+                
+
+                <div 
+                    style={{position: "absolute",marginLeft: 180, marginTop: 5, color: "#1E90FF", fontFamily: "Avenir-light"}}
+                >
+                    B
+                </div>
+
+                <div 
+                    style={{position: "absolute", marginLeft: 10, marginTop: 177, color: "#006400", fontFamily: "Avenir-light"}}
+                >
+                    C
+                </div>
+
+                <div 
+                    style={{position: "absolute", marginLeft: 180, marginTop: 177, color: "#8B0000", fontFamily: "Avenir-light"}}
+                >
+                    D
+                </div>
+            </motion.div>
+              
+            </div>
+        )
+    }
+
+    function elements() {
+        return (
+            <div >
+                <Card style={{borderRadius: 10, backgroundColor: "#DCDCDC", paddingLeft:20, paddingRight: 20, paddingBottom: 18, paddingTop: 1, justifyContent: "center"}}>
                     <Card style={{borderRadius: 10, backgroundColor: "#A9A9A9", paddingLeft: 50, paddingRight: 50, marginTop:20, justifyContent: "center", alignItems: "center"}}>
                         <Card.Body style={{alignItems: "center", justifyContent: "center", paddingBottom: 10}}>
                             <div style= {{justifyContent: "center", display: "flex", fontSize: 20, paddingTop: 5, fontFamily: "Avenir-light",paddingBottom: 5}}>
@@ -513,7 +554,7 @@ export default function GroupViz() {
                             <motion.div
                                 animate={r0Anim}
                                 onTap={() => handleAnimation(0)}
-
+                                ref={r0Ref}
                                 whileHover={{scale:1.1}}
                                 style={{zIndex: 0, position: "absolute", backgroundColor: "#ffd000",display: "flex", cursor: "pointer", alignItems: "center", justifyContent: "flex-start", width: 170, fontFamily: "Avenir-light", borderRadius: 5 , paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
@@ -534,7 +575,8 @@ export default function GroupViz() {
                             </motion.div>
                             <motion.div
                                 animate={r90Anim}
-                                onTap={() => handleAnimation(41)}                                
+                                onTap={() => handleAnimation(41)} 
+                                ref={r90Ref}                               
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ffd000",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
                             >
@@ -555,6 +597,7 @@ export default function GroupViz() {
                             <motion.div
                                 animate={r180Anim}
                                 onTap={() => handleAnimation(83)}                                
+                                ref={r180Ref}
 
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ffba00",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
@@ -576,6 +619,7 @@ export default function GroupViz() {
                             </motion.div>
                             <motion.div
                                 animate={r270Anim}
+                                ref={r270Ref}
                                 onTap={() => handleAnimation(124)}    
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ffa500",display: "flex",cursor: "pointer", justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
@@ -604,6 +648,8 @@ export default function GroupViz() {
                             </div>
                             <motion.div
                                 animate={HAnim}
+                                ref={HRef}
+
                                 onTap={() => handleAnimation(235)}   
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ff8500",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 ,fontFamily: "Avenir-light", paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
@@ -622,6 +668,8 @@ export default function GroupViz() {
                             </motion.div>
                             <motion.div
                                 animate={VAnim}
+                                ref={VRef}
+
                                 onTap={() => handleAnimation(277)}   
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ff7000",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
@@ -642,6 +690,8 @@ export default function GroupViz() {
                             </motion.div>
                             <motion.div
                                 animate={DAnim}
+                                ref={DRef}
+
                                 onTap={() => handleAnimation(318)}  
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ff5a00",display: "flex", cursor: "pointer",justifyContent: "flex-start", alignItems: "center", width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
@@ -660,6 +710,8 @@ export default function GroupViz() {
                             </motion.div>
                             <motion.div
                                 animate={DprimeAnim}
+                                ref={DprimeRef}
+
                                 onTap={() => handleAnimation(360)}
                                 whileHover={{scale:1.1}}
                                 style={{position: "absolute", backgroundColor: "#ff4500",display: "flex",cursor: "pointer", justifyContent: "flex-start", alignItems: "center",width: 170, borderRadius: 5 , fontFamily: "Avenir-light",paddingTop: 5, paddingBottom: 5, marginBottom: 4,fontSize: 20, opacity:1}}
@@ -681,80 +733,109 @@ export default function GroupViz() {
                     </Card>
                     
                 </Card>
+            </div>
+        )
+    }
 
 
 
-                <motion.div  
-                    whileHover={{scale:1.1}}
-                    animate={origAnim}
-                    style={{position: "absolute", width: '200px', height: "200px", backgroundColor: "orange",  borderRadius: 10, display: "flex", borderWidth: "10px",}}>
-                    <div 
-                        style={{position: "absolute", marginLeft: 10, marginTop: 5, color: "#00008B", fontFamily: "Avenir-light"}}
-                    >
-                        A
+
+    return (
+        <div className="Page" style={{display: "flex", flexDirection: "column"}} >
+            <div style={{display: "flex", paddingLeft: 30, backgroundColor: "#DCDCDC",}}>
+                <h1 style={{fontFamily: "Avenir-light", flex: 1}}>Visualize Group Theory</h1>
+                <h1 style={{fontFamily: "Avenir-light",  marginTop: 35, marginRight: 90, fontSize: 13}}>created by Alex Young</h1>
+
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center",}}>
+                <div style={{display: "flex", flexDirection: "row",  alignContent: "center"}}>
+                    <div style={{display: "flex", flexDirection: "column", alignItems: "center", marginLeft: windowWidth*.02}}>
+                        <div>
+                            <h1 style={{fontSize: 20, display: "flex", justifycontent: "center", alignItems: "center", fontFamily: "Avenir-light",}}>Original</h1>
+                        </div>
+                        
+                        {squares()}
+                        <div>
+                            <motion.h1 
+                                animate={info}
+                                whileHover={{scale:1.05}}
+                                style={{borderRadius: 10, fontStyle: "italic", cursor: "pointer", backgroundColor: "#DCDCDC", alignItems: "center", paddingTop: 10, paddingLeft: 20, paddingRight: 20, paddingBottom: 10, fontSize: 16,fontFamily: "Avenir-light", marginTop: 20,  width: 200,  justifyContent: "center", display: "flex"}}>
+                                    The Dihedral Group of Order 4 (D4) describes the rotations and reflections that capture the symmetries of a square. Each composition of two group elements is equavalent to some other group element!
+                            </motion.h1>
+                        </div>
+                        
+                        
+                    </div>
+                    <div style={{marginLeft: windowWidth*.6}}>
+
                     </div>
                     
+                    <AnimatePresence>
+                        {initialMessage && (
+                            
+                            <motion.h1 
+                            initial={{opacity:1}}
+                            exit={{opacity:0, transition: {duration: 1}}}
+                                style={{position: "absolute", marginLeft: windowWidth*.32, marginTop: windowHeight*.3, width: 600, fontSize: 20,fontFamily: "Avenir-light", display: "flex",}}>
+                                Click on the group elements to visualize a composition!
 
-                    <div 
-                        style={{position: "absolute",marginLeft: 180, marginTop: 5, color: "#1E90FF", fontFamily: "Avenir-light"}}
-                    >
-                        B
+                            </motion.h1>
+                        )}
+                    </AnimatePresence>
+                    <div style={{display: "flex", flexDirection: "column", alignItems: "center", marginRight: windowWidth*.02}}>
+                        <h1 style={{fontSize: 20,display: "flex", fontFamily: "Avenir-light"}}>D4 Group Elements</h1>
+                        {elements()}
                     </div>
-
-                    <div 
-                        style={{position: "absolute", marginLeft: 10, marginTop: 177, color: "#006400", fontFamily: "Avenir-light"}}
-                    >
-                        C
-                    </div>
-
-                    <div 
-                        style={{position: "absolute", marginLeft: 180, marginTop: 177, color: "#8B0000", fontFamily: "Avenir-light"}}
-                    >
-                        D
-                    </div>
-                </motion.div>
-              
-            </div>
-            <div style= {{justifyContent: "flex-start", alignItems: "center", alignContent: "center", display: "flex", marginLeft: 220, marginTop: 248}}>
-                <motion.div
-                    onTap={() => resetAnimations()}
-                    whileHover={{scale:1.1}}
-                    animate={resetAnim}
-                    style={{position: "absolute", marginLeft: -130,  marginTop: -6, cursor: "pointer",fontSize: 30, color: "#ff9000", display: "flex", justifyContent: "center", alignContent: "center", alignItems: "center"}}>
                     
-                    reset
-                </motion.div>
-                <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
-                    Composition: 
                 </div>
-                <div style={{backgroundColor: "#E8E8E8", marginLeft: 20, marginRight: 30,borderRadius: 10, width: 200, height: 45}}>
+                
+                
 
-                </div>
-                <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
-                    + 
-                </div>
-                <div style={{backgroundColor: "#E8E8E8", marginLeft: 20, marginRight: 30,borderRadius: 10, width: 200, height: 45}}>
-
-                </div>
-                <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
-                    = 
-                </div>
-                <div style={{backgroundColor: "#E8E8E8", marginLeft: 20, marginRight: 30,borderRadius: 10, width: 200, height: 45}}>
-
-                </div>
             </div>
+           
+            <div style= {{justifyContent: "center", alignItems: "center", alignContent: "center", flexDirection: "column", display: "flex",marginRight: windowWidth*.07, marginTop: -windowHeight*.05, marginLeft: -windowWidth*.03}}>   
+                <div style={{display:"flex"}}>
+                    <motion.div
+                        onTap={() => resetAnimations()}
+                        whileHover={{scale:1.1}}
+                        animate={resetAnim}
+                        style={{cursor: "pointer", fontSize: 30, color: "#ff9000", marginRight: windowWidth*.06, marginLeft: -windowWidth*.06,}}>
+                        
+                        reset
+                    </motion.div>  
+                    <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
+                        composition: 
+                    </div>
+                    <div 
+                    ref={comp1Ref}
+                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.01, marginRight: windowWidth*.01, borderRadius: 10, width: 200, height: 45}}>
 
+                    </div>
+                    <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
+                        + 
+                    </div>
+                    <div 
+                    ref={comp2Ref}
+                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.01, marginRight: windowWidth*.015, borderRadius: 10, width: 200, height: 45}}>
 
+                    </div>
+                    <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
+                        = 
+                    </div>
+                    <div 
+                    ref={compResultRef}
+                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.015, marginRight: windowWidth*.01, borderRadius: 10, width: 200, height: 45}}>
 
-
-            <div style={{display:"flex", alignItems: "center",}}>
+                    </div>
+                </div>
+                <div style={{display:"flex", alignItems: "center",}}>
                 
                 <motion.div 
                     onTap={() => handleStart()}
                     initial={{opacity: .5}}
                     whileHover={{scale:1.2}}
                     animate={playAnim}
-                    style={{marginLeft: 750, paddingTop: 40, fontSize: 60, color: "orange", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
+                    style={{paddingTop: 30, marginLeft: 150, fontSize: 60, color: "orange",  display: "flex", justifyContent: "center", alignItems: "center"}}>
                     
                     <AiFillPlayCircle />
                 </motion.div>
@@ -762,6 +843,13 @@ export default function GroupViz() {
 
           
             </div>
+                
+            </div>
+
+
+
+
+           
 
            
 
