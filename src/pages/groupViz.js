@@ -205,7 +205,7 @@ export default function GroupViz() {
 
         await anim.start(initialMove)
         await anim.start({scale:1.5, transition: {duration: 1, type: "spring"}})
-        await elem1Control.start({scale:1.3, opacity: 1, transition: {duration: 1.5, type: "spring", loop: "infinity"}})
+        await elem1Control.start({scale:1.2, opacity: 1, transition: {duration: 1.5, type: "spring", loop: "infinity"}})
 
         const event1 = events.one
         await anim.start(event1)
@@ -214,7 +214,7 @@ export default function GroupViz() {
 
     async function secondMove() {
         await setResultComp(cayleyLookup()[0])
-        await elem2Control.start({scale:1.3, opacity:1, transition: {duration: 1.5, type: "spring", loop: "infinity"}})
+        await elem2Control.start({scale:1.2, opacity:1, transition: {duration: 1.5, type: "spring", loop: "infinity"}})
 
         await anim.start(correctRotation()[0])
         await numberAnimation1.start(correctRotation()[1])    
@@ -340,7 +340,7 @@ export default function GroupViz() {
 
 
         await controller.start({opacity:1, translateX: (compResultRef.current.offsetLeft- elemRef.current.offsetLeft) +15, translateY: (compResultRef.current.offsetTop - elemRef.current.offsetTop) + 4,transition: {duration: 1}})
-        await controller.start({scale:1.3, transition: {duration:1, type: "spring"}})
+        await controller.start({scale:1.2, transition: {duration:1, type: "spring"}})
     }
 
     function animateElem(compRef, elem, elemNum) {
@@ -548,7 +548,7 @@ export default function GroupViz() {
                 <Card style={{borderRadius: 10, backgroundColor: "#DCDCDC", paddingLeft:20, paddingRight: 20, paddingBottom: 18, paddingTop: 1, justifyContent: "center"}}>
                     <Card style={{borderRadius: 10, backgroundColor: "#A9A9A9", paddingLeft: 50, paddingRight: 50, marginTop:20, justifyContent: "center", alignItems: "center"}}>
                         <Card.Body style={{alignItems: "center", justifyContent: "center", paddingBottom: 10}}>
-                            <div style= {{justifyContent: "center", display: "flex", fontSize: 20, paddingTop: 5, fontFamily: "Avenir-light",paddingBottom: 5}}>
+                            <div style= {{justifyContent: "center", display: "flex", fontSize: 20, paddingTop: 5, fontFamily: "Avenir-light",paddingBottom: 1}}>
                                 Rotations: 
                             </div>
                             <motion.div
@@ -641,9 +641,9 @@ export default function GroupViz() {
                         </Card.Body>
                         
                     </Card>
-                    <Card style={{borderRadius: 10, backgroundColor: "#A9A9A9", paddingLeft: 50, paddingRight: 50, marginTop:20, justifyContent: "center", alignItems: "center"}}>
+                    <Card style={{borderRadius: 10, backgroundColor: "#A9A9A9", paddingLeft: 50, paddingRight: 50, marginTop:5, justifyContent: "center", alignItems: "center"}}>
                         <Card.Body style={{alignItems: "center", justifyContent: "center", paddingBottom: 10}}>
-                            <div style= {{justifyContent: "center", display: "flex", fontSize: 20, paddingTop: 5, fontFamily: "Avenir-light",paddingBottom: 5}}>
+                            <div style= {{justifyContent: "center", display: "flex", fontSize: 20, paddingTop: 5, fontFamily: "Avenir-light",paddingBottom: 1}}>
                                 Reflections: 
                             </div>
                             <motion.div
@@ -738,8 +738,6 @@ export default function GroupViz() {
     }
 
 
-
-
     return (
         <div className="Page" style={{display: "flex", flexDirection: "column"}} >
             <div style={{display: "flex", paddingLeft: 30, backgroundColor: "#DCDCDC",}}>
@@ -760,7 +758,7 @@ export default function GroupViz() {
                                 animate={info}
                                 whileHover={{scale:1.05}}
                                 style={{borderRadius: 10, fontStyle: "italic", cursor: "pointer", backgroundColor: "#DCDCDC", alignItems: "center", paddingTop: 10, paddingLeft: 20, paddingRight: 20, paddingBottom: 10, fontSize: 16,fontFamily: "Avenir-light", marginTop: 20,  width: 200,  justifyContent: "center", display: "flex"}}>
-                                    The Dihedral Group of Order 4 (D4) describes the rotations and reflections that capture the symmetries of a square. Each composition of two group elements is equavalent to some other group element!
+                                    The Dihedral Group of Order 4 (D4) describes the rotations and reflections that capture the symmetries of a square. Each composition of two group elements is equivalent to some element in the group!
                             </motion.h1>
                         </div>
                         
@@ -769,15 +767,26 @@ export default function GroupViz() {
                     <div style={{marginLeft: windowWidth*.6}}>
 
                     </div>
-                    
                     <AnimatePresence>
                         {initialMessage && (
                             
                             <motion.h1 
                             initial={{opacity:1}}
                             exit={{opacity:0, transition: {duration: 1}}}
-                                style={{position: "absolute", marginLeft: windowWidth*.32, marginTop: windowHeight*.3, width: 600, fontSize: 20,fontFamily: "Avenir-light", display: "flex",}}>
-                                Click on the group elements to visualize a composition!
+                                style={{position: "absolute", marginLeft: windowWidth*.28, marginTop: windowHeight*.28, width: 700, fontSize: 25,fontFamily: "Avenir-light", display: "flex",}}>
+                                this tool visualizes the symmetry group of a square
+
+                            </motion.h1>
+                        )}
+                    </AnimatePresence>
+                    <AnimatePresence>
+                        {initialMessage && (
+                            
+                            <motion.h1 
+                            initial={{opacity:1}}
+                            exit={{opacity:0, transition: {duration: 1}}}
+                                style={{position: "absolute", marginLeft: windowWidth*.26, marginTop: windowHeight*.35, width: 700, fontSize: 25,fontFamily: "Avenir-light", display: "flex",}}>
+                                click on two D4 group elements to create a composition
 
                             </motion.h1>
                         )}
@@ -792,9 +801,9 @@ export default function GroupViz() {
                 
 
             </div>
-           
-            <div style= {{justifyContent: "center", alignItems: "center", alignContent: "center", flexDirection: "column", display: "flex",marginRight: windowWidth*.07, marginTop: -windowHeight*.05, marginLeft: -windowWidth*.03}}>   
-                <div style={{display:"flex"}}>
+    
+            <div style= {{justifyContent: "center",  alignItems: "center", alignContent: "center", flexDirection: "column", display: "flex", marginTop: windowHeight*.005, marginLeft: -windowWidth*.03}}>   
+                <div style={{display:"flex", marginLeft: -180}}>
                     <motion.div
                         onTap={() => resetAnimations()}
                         whileHover={{scale:1.1}}
@@ -804,27 +813,27 @@ export default function GroupViz() {
                         reset
                     </motion.div>  
                     <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
-                        composition: 
+                        composition:  
                     </div>
                     <div 
                     ref={comp1Ref}
-                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.01, marginRight: windowWidth*.01, borderRadius: 10, width: 200, height: 45}}>
+                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.01, marginRight: windowWidth*.005, borderRadius: 10, width: 200, height: 45}}>
 
                     </div>
-                    <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
+                    <div style={{fontFamily: "Avenir-light", fontSize: 20, display: "flex", alignItems: "center"}}>
                         + 
                     </div>
                     <div 
                     ref={comp2Ref}
-                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.01, marginRight: windowWidth*.015, borderRadius: 10, width: 200, height: 45}}>
+                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.005, marginRight: windowWidth*.005, borderRadius: 10, width: 200, height: 45}}>
 
                     </div>
-                    <div style={{fontFamily: "Avenir-light", fontSize: 30}}>
+                    <div style={{fontFamily: "Avenir-light", fontSize: 20, display: "flex", alignItems: "center"}}>
                         = 
                     </div>
                     <div 
                     ref={compResultRef}
-                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.015, marginRight: windowWidth*.01, borderRadius: 10, width: 200, height: 45}}>
+                    style={{backgroundColor: "#E8E8E8", marginLeft: windowWidth*.005, marginRight: windowWidth*.01, borderRadius: 10, width: 200, height: 45}}>
 
                     </div>
                 </div>
@@ -835,7 +844,7 @@ export default function GroupViz() {
                     initial={{opacity: .5}}
                     whileHover={{scale:1.2}}
                     animate={playAnim}
-                    style={{paddingTop: 30, marginLeft: 150, fontSize: 60, color: "orange",  display: "flex", justifyContent: "center", alignItems: "center"}}>
+                    style={{paddingTop: 20, marginLeft: 55, fontSize: 60, color: "orange",  display: "flex", justifyContent: "center", alignItems: "center"}}>
                     
                     <AiFillPlayCircle />
                 </motion.div>
